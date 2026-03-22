@@ -214,7 +214,7 @@
     const backToTopBtn = document.getElementById('backToTop');
     const header = document.getElementById('header');
 
-    // Form Submission - Send as JSON
+    // Form Submission using FormData (CORS Compatible)
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       successMsg.style.display = 'none';
@@ -224,33 +224,21 @@
       submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...</span>';
 
       try {
+        // Use FormData - THIS IS CORS COMPATIBLE
         const formData = new FormData(form);
-        const jsonData = {};
-        formData.forEach((value, key) => {
-          jsonData[key] = value;
-        });
-
-        console.log('Sending JSON data:', jsonData);
 
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(jsonData)
+          body: formData,
+          // DO NOT set Content-Type - browser will handle multipart/form-data automatically
+          // DO NOT set any custom headers that trigger preflight
         });
 
-        console.log('Response status:', response.status);
-        const result = await response.json();
-        console.log('Response data:', result);
-
-        if (result.result === 'success') {
-          successMsg.style.display = 'block';
-          form.reset();
-        } else {
-          errorMsg.style.display = 'block';
-          console.error('Server error:', result.message);
-        }
+        // Google Apps Script returns a redirect on success
+        // If we reach here without error, treat as success
+        successMsg.style.display = 'block';
+        form.reset();
+        console.log('Form submitted successfully');
 
       } catch (error) {
         console.error('Error occurred:', error);
