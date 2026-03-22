@@ -215,38 +215,50 @@
     const backToTopBtn = document.getElementById('backToTop');
     const header = document.getElementById('header');
 
-    // Form Submission using FormData
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      successMsg.style.display = 'none';
-      errorMsg.style.display = 'none';
+   // Form Submission using JSON instead of FormData
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  successMsg.style.display = 'none';
+  errorMsg.style.display = 'none';
 
-      // Change button state
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...</span>';
+  // Change button state
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...</span>';
 
-      try {
-        // Create FormData object - This is the robust way
-        const formData = new FormData(form);
-
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: formData
-          // DO NOT set Content-Type header, browser handles it automatically with boundary
-        });
-
-        // Since Google Scripts returns a redirect for cross-origin, we assume success if no error thrown
-        successMsg.style.display = 'block';
-        form.reset();
-
-      } catch (error) {
-        console.error('Error:', error);
-        errorMsg.style.display = 'block';
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Submit Registration';
-      }
+  try {
+    // Convert FormData to JSON object
+    const formData = new FormData(form);
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
     });
+
+    const response = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jsonData)
+    });
+
+    // Parse response
+    const result = await response.json();
+
+    if (result.result === 'success') {
+      successMsg.style.display = 'block';
+      form.reset();
+    } else {
+      throw new Error(result.message || 'Error submitting form');
+    }
+
+  } catch (error) {
+    console.error('Error:', error);
+    errorMsg.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = 'Submit Registration';
+  }
+});
 
     // Scroll Effects
     window.addEventListener('scroll', () => {
