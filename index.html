@@ -215,7 +215,7 @@
     const backToTopBtn = document.getElementById('backToTop');
     const header = document.getElementById('header');
 
-   // Form Submission using JSON instead of FormData
+   // Form Submission - Send as JSON
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   successMsg.style.display = 'none';
@@ -226,12 +226,14 @@ form.addEventListener('submit', async (e) => {
   submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...</span>';
 
   try {
-    // Convert FormData to JSON object
+    // Convert form to JSON object
     const formData = new FormData(form);
     const jsonData = {};
     formData.forEach((value, key) => {
       jsonData[key] = value;
     });
+
+    console.log('Sending JSON data:', jsonData);
 
     const response = await fetch(SCRIPT_URL, {
       method: 'POST',
@@ -241,25 +243,26 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify(jsonData)
     });
 
-    // Parse response
+    console.log('Response status:', response.status);
     const result = await response.json();
+    console.log('Response data:', result);
 
     if (result.result === 'success') {
       successMsg.style.display = 'block';
       form.reset();
     } else {
-      throw new Error(result.message || 'Error submitting form');
+      errorMsg.style.display = 'block';
+      console.error('Server error:', result.message);
     }
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error occurred:', error);
     errorMsg.style.display = 'block';
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = 'Submit Registration';
   }
 });
-
     // Scroll Effects
     window.addEventListener('scroll', () => {
       if (window.pageYOffset > 50) header.classList.add('scrolled');
