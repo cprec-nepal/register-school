@@ -205,7 +205,6 @@
   </button>
 
   <script>
-    // YOUR SCRIPT URL
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz44qRMbyZ_sedbXJiTNcxUZj_8jAJdYPIwUvEDOrAz4xwV0pspG4-fbl6rQHeRvjbN/exec';
 
     const form = document.getElementById('schoolRegistrationForm');
@@ -215,54 +214,53 @@
     const backToTopBtn = document.getElementById('backToTop');
     const header = document.getElementById('header');
 
-   // Form Submission - Send as JSON
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  successMsg.style.display = 'none';
-  errorMsg.style.display = 'none';
+    // Form Submission - Send as JSON
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
 
-  // Change button state
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...</span>';
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Submitting...</span>';
 
-  try {
-    // Convert form to JSON object
-    const formData = new FormData(form);
-    const jsonData = {};
-    formData.forEach((value, key) => {
-      jsonData[key] = value;
+      try {
+        const formData = new FormData(form);
+        const jsonData = {};
+        formData.forEach((value, key) => {
+          jsonData[key] = value;
+        });
+
+        console.log('Sending JSON data:', jsonData);
+
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(jsonData)
+        });
+
+        console.log('Response status:', response.status);
+        const result = await response.json();
+        console.log('Response data:', result);
+
+        if (result.result === 'success') {
+          successMsg.style.display = 'block';
+          form.reset();
+        } else {
+          errorMsg.style.display = 'block';
+          console.error('Server error:', result.message);
+        }
+
+      } catch (error) {
+        console.error('Error occurred:', error);
+        errorMsg.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Registration';
+      }
     });
 
-    console.log('Sending JSON data:', jsonData);
-
-    const response = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(jsonData)
-    });
-
-    console.log('Response status:', response.status);
-    const result = await response.json();
-    console.log('Response data:', result);
-
-    if (result.result === 'success') {
-      successMsg.style.display = 'block';
-      form.reset();
-    } else {
-      errorMsg.style.display = 'block';
-      console.error('Server error:', result.message);
-    }
-
-  } catch (error) {
-    console.error('Error occurred:', error);
-    errorMsg.style.display = 'block';
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = 'Submit Registration';
-  }
-});
     // Scroll Effects
     window.addEventListener('scroll', () => {
       if (window.pageYOffset > 50) header.classList.add('scrolled');
@@ -282,6 +280,6 @@ form.addEventListener('submit', async (e) => {
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  </script>
+</script>
 </body>
 </html>
